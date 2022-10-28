@@ -4,12 +4,13 @@ import  type {cadastroRequisicao} from "../../types/cadastroRequisicao";
 import {usuarioModel} from "../../models/usuarioModel";
 import {conectarMongoDB} from "../../middlewares/conectarMongoDB";
 import md5 from "md5";
+import {upload, uploadImagemCosmic} from "../../services/uploadImagemCosmic";
+import nc from "next-connect";
 
-
-const endpointCadastro = async (
-    req : NextApiRequest, 
-    res : NextApiResponse<respostaPadraoMsg>) => {
-    if (req.method === "POST") {
+const handler = nc()
+    .use(upload.single("file"))
+    .post(async (req : NextApiRequest, 
+        res : NextApiResponse<respostaPadraoMsg>) => {         
         const usuario = req.body as cadastroRequisicao;
 
         if (!usuario.nome || usuario.nome.length < 2) {
@@ -30,16 +31,26 @@ const endpointCadastro = async (
                 if(usuarioComMesmoEmail && usuarioComMesmoEmail.length > 0){
                     return res.status(400).json({ erro: 'ja existe uma conta com o email informado'});
                 }
+                //enviar a imagem do multer para o cosmic
+                const image = await uploadImagemCosmic(req);
                 //salvarno banco de dados
             const usuarioASerSalvo = {
                 nome : usuario.nome,
                 email : usuario.email,
-                senha : md5(usuario.senha)
-            } 
+                senha : md5(usuario.senha),
+                avatar : image?.media?.url
+            };
+
+
+ 
             await usuarioModel.create(usuarioASerSalvo);
-            return res.status(200).json({msg : 'Usuario criado com sucesso'});
-   
-    } 
-    return res.status(405).json({ erro: "Metodo informado nao é valido"});    
-}
-export default conectarMongoDB(endpointCadastro); 
+            return res.status(200).json({msg : 'Usuario criado com sucesso'});   
+    });
+    
+    export const config = {
+        api:{
+            bodyParser: false
+        }
+    }
+
+export default conectarMongoDB(handler); 
