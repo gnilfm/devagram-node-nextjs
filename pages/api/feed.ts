@@ -4,6 +4,7 @@ import {validarTokenJwt} from "../../middlewares/validarTokenJWT";
 import { conectarMongoDB } from "../../middlewares/conectarMongoDB";
 import { usuarioModel } from "../../models/usuarioModel";
 import { publicacaoModel } from "../../models/publicacaoModel";
+import { seguidorModel } from "../../models/seguidorModel";
 
 const feedEndpoint = async (req : NextApiRequest, res : NextApiResponse<respostaPadraoMsg> | any) => {
     try {
@@ -19,7 +20,41 @@ const feedEndpoint = async (req : NextApiRequest, res : NextApiResponse<resposta
                 .sort({data : -1});
 
                 return res.status(200).json(publicacoes);
-            }            
+            }else{
+               //feed principal 
+               const {userId} = req.query;
+               const usuarioLogado = await usuarioModel.findById(userId);
+               if(!usuarioLogado){
+                return res.status(400).json({erro : "Usuario nao encontrado"})
+               }
+               //buscar seguidores
+               const seguidores = await seguidorModel.find
+               ({usuarioId : usuarioLogado._id});
+               const seguidoresIds = seguidores.map(s => s.usuarioSeguidoId);
+               const publicacoes = await publicacaoModel.find
+               ({
+                 $or : [
+                {idUsuario : usuarioLogado._id},
+                {idUsuario : seguidoresIds}
+               ]
+            })
+                .sort({data : -1 });
+
+                const result = [];
+                for(const publicacao of publicacoes) {
+                    const ususarioDaPublicacao = await usuarioModel.findById(publicacao.idUsuario);
+                    if(ususarioDaPublicacao){
+                        const final = {...publicacao._doc, usuario : {
+                            nome : ususarioDaPublicacao.nome,
+                            avatar : ususarioDaPublicacao.avatar
+                        }}
+                        result.push(final);
+                    }
+                }
+
+                return res.status(200).json(result);
+
+            }           
         }
         return res.status(405).json({erro: "Metodo informado nao e valido"})
     }catch (e) {

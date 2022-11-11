@@ -38,6 +38,9 @@ const handler = nc()
             foto : image.media.url,
             data : new Date()
         }
+        usuario.publicacoes++
+        await usuarioModel.findByIdAndUpdate({_id : usuario._id}, usuario)
+
 
         await publicacaoModel.create(publicacao);
 

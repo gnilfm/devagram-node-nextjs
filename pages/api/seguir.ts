@@ -10,7 +10,7 @@ async (req : NextApiRequest, res : NextApiResponse<respostaPadraoMsg>) => {
     try{
         if(req.method === "PUT"){
 
-            const {userId, id} = req.query;
+            const {userId, id} = req?.query;
 
             //usuario login autenticado = quem esta fazendo a açao
             const usuarioLogado = await usuarioModel.findById(userId);
