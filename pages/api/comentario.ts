@@ -4,6 +4,7 @@ import {validarTokenJwt} from "../../middlewares/validarTokenJWT";
 import { conectarMongoDB } from "../../middlewares/conectarMongoDB";
 import { usuarioModel } from "../../models/usuarioModel";
 import { publicacaoModel } from "../../models/publicacaoModel";
+import { politicaCORS } from "../../middlewares/politicaCORS";
 
 
 const comentarioEndpoint = async (req : NextApiRequest, res : NextApiResponse<respostaPadraoMsg>) => {
@@ -28,7 +29,7 @@ const comentarioEndpoint = async (req : NextApiRequest, res : NextApiResponse<re
                 nome : usuarioLogado.nome,
                 comentario : req.body.comentario
             }
-            publicacao.comentarios.push(req.body.comentario);
+            publicacao.comentarios.push(comentario);
             await publicacaoModel.findByIdAndUpdate({_id : publicacao._id}, publicacao);
             return res.status(200).json({msg : "Comentario adicionado com sucesso"});
 
@@ -41,4 +42,4 @@ const comentarioEndpoint = async (req : NextApiRequest, res : NextApiResponse<re
     }
 }
     
-export default validarTokenJwt(conectarMongoDB(comentarioEndpoint));
+export default politicaCORS (validarTokenJwt(conectarMongoDB(comentarioEndpoint)));

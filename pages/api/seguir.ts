@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { conectarMongoDB } from "../../middlewares/conectarMongoDB";
+import { politicaCORS } from "../../middlewares/politicaCORS";
 import { validarTokenJwt } from "../../middlewares/validarTokenJWT";
 import { seguidorModel } from "../../models/seguidorModel";
 import { usuarioModel } from "../../models/usuarioModel";
@@ -58,4 +59,4 @@ async (req : NextApiRequest, res : NextApiResponse<respostaPadraoMsg>) => {
         return res.status(500).json({erro : "Nao foi possivel seguir/dessegir ususario informado"});
     }
 }
-export default validarTokenJwt(conectarMongoDB(endpointSeguir)) ;
+export default politicaCORS (validarTokenJwt(conectarMongoDB(endpointSeguir)));

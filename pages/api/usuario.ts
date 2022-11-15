@@ -5,6 +5,7 @@ import { conectarMongoDB } from "../../middlewares/conectarMongoDB";
 import { usuarioModel } from "../../models/usuarioModel";
 import nc from "next-connect";
 import {upload, uploadImagemCosmic} from "../../services/uploadImagemCosmic";
+import { politicaCORS } from "../../middlewares/politicaCORS";
 
 const handler = nc()
     .use(upload.single("file"))
@@ -62,7 +63,7 @@ const handler = nc()
         }
     }
 
-    export default validarTokenJwt(conectarMongoDB(handler));
+    export default politicaCORS (validarTokenJwt(conectarMongoDB(handler)));
 
 
 

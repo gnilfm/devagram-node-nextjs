@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { conectarMongoDB } from "../../middlewares/conectarMongoDB";
+import { politicaCORS } from "../../middlewares/politicaCORS";
 import { validarTokenJwt } from "../../middlewares/validarTokenJWT";
 import { publicacaoModel } from "../../models/publicacaoModel";
 import { usuarioModel } from "../../models/usuarioModel";
@@ -44,4 +45,4 @@ return res.status(500).json({erro : "Ocorreu err ao curtir/descutir publicacao"}
 
 }
 
-export default validarTokenJwt(conectarMongoDB(likeEndpoint));
+export default politicaCORS (validarTokenJwt(conectarMongoDB(likeEndpoint)));
